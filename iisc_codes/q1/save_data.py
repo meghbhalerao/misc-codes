@@ -1,18 +1,5 @@
 import numpy as np
 import pickle
-
-
-something = 0
-def get_k():
-    return something
-
-def L2_distance():
-    
-    return something
-
-def cosine_distance():
-    return something
-
 def unpickle(file):
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
@@ -31,6 +18,3 @@ for batch in range(1,6):
     labels[start:end,:] = labels_batch
     start = start + 10000
     end = end + 10000
-
-
-
