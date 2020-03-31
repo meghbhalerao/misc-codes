@@ -1,27 +1,26 @@
 import numpy as np
+import pickle
 
-# =============================================================================
-# def get_k():
-#     return something
-# 
-# def L2_distance():
-#     
-#     return something
-# 
-# def cosine_distance():
-#     return something
-# =============================================================================
+
+something = 0
+def get_k():
+    return something
+
+def L2_distance():
+    
+    return something
+
+def cosine_distance():
+    return something
 
 def unpickle(file):
-    import pickle
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
+base_name = "/Users/megh/Work/misc/data/cifar-10-batches-py/data_batch_"
+for batch in range(1,5):
+    data_dict = unpickle(base_name+str(batch))
+    data = data_dict['data']
+    labels = data_dict['labels']
 
-def main():
 
-
-    return 0
-
-if __name__ == "__main__":
-    main()
