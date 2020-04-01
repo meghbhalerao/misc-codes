@@ -108,6 +108,6 @@ for column in range(pred_mat_test.shape[1]):
     pred_test.append(get_most_frequent(pred_mat_test[:,column].astype(int)))
 
 pred_test =  np.array([pred_test]).T
-acc_vec_test =  (pred_test - labels_val_test).astype(int)
+acc_vec_test =  (pred_test - labels_test).astype(int)
 acc_test = (pred_test.shape[0] - np.count_nonzero(acc_vec_test))/pred_test.shape[0]
 print("Accuracy on test set of CIFAR-10 is: ",acc_test*100," percent")
