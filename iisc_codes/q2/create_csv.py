@@ -35,4 +35,4 @@ for patient in patient_train_list:
             label = 9
         if p=='truck':
             label = 10
-        writer.writerow([train_path + patient])
+        writer.writerow([train_path + patient,label])

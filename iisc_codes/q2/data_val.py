@@ -6,28 +6,35 @@ import os
 import random
 import scipy
 import scipy.ndimage
+import imageio
+
 
 class CIFAR10_val(Dataset):
-    def __init__(self,data):
-        self.data = data
+    def __init__(self,df):
+        self.df = df
     def __len__(self):
-        return self.data.shape[0]  
+        return len(self.df)
     def one_hot(label,num_classes):
         one_hot = np.zeros((1,num_classes))
         one_hot[1,label-1] = 1
         return one_hot
+    
+    def normalize(matrix):
+        mean = np.mean(matrix.flatten())
+        sigma = np.std(matrix.flatten())
+        matrix = (matrix - mean)/sigma
+        return matrix 
         
     def __getitem__(self, index):
-        image = self.data[index,1:]
-        r = image[0:1024]
-        r = r.reshape(32,32)
-        r = scipy.misc.imresize(r,(224,224))
+        image = self.df.iloc[index,0]
+        gt = int(self.df.iloc[index,1])
+        image = imageio.imread(image)
+        r = image[:,:,0]
+        g = image[:,:,1]
+        b = image[:,:,2]
+        r = self.normalize(r)
         r = scipy.ndimage.zoom(r,7)
-        g = image[1024:2048]
-        g = g.reshape(32,32)
         g = scipy.ndimage.zoom(g,7)
-        b = image[2048:3072]
-        b = b.reshape(32,32)
         b = scipy.ndimage.zoom(b,7)
         im_stack = np.zeros((3,224,224))
         im_stack[0] = r

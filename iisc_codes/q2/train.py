@@ -10,50 +10,34 @@ from data import CIFAR10_train
 from data_val import CIFAR10_val
 from torch.utils.data import Dataset, DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import pandas as pd
 
-def normalize(matrix):
-    mean = np.mean(matrix.flatten())
-    sigma = np.std(matrix.flatten())
-    matrix = (matrix - mean)/sigma
-    return matrix 
 def MSE_loss(mat1,mat2):
     diff = mat1.flatten() - mat2.flatten()
     loss = sum(diff*diff)
     return loss
     
-start = time.time()
-data_train_full = np.loadtxt("/Users/megh/Work/misc/data/cifar-10-batches-py/txt_data/data_train.txt")
-labels_train_full = np.loadtxt("/Users/megh/Work/misc/data/cifar-10-batches-py/txt_data/labels_train.txt")
-end = time.time()
-print("Loading data took: ", (end-start)/60, " minutes")
-# Expanding dimentions of labels for concatenation with image data
-labels_train_full = np.expand_dims(labels_train_full,axis=1)
+df_train_full = pd.read_csv("train.csv")
 # Defining the train and validation sets clearly
-data_train = data_train_full[0:45000,:]
-data_val = data_train_full[45000:50000,:]
-labels_train = labels_train_full[0:45000,:]
-labels_val = labels_train_full[45000:50000,:]
-# Normalization of the data elements
-start = time.time()
-for row in range(data_train.shape[0]):
-    data_train[row,:] = normalize(data_train[row,:])  
-for row in range(data_val.shape[0]):
-    data_val[row,:] = normalize(data_val[row,:])  
-end = time.time()
-print("Normalizing data took: ", (end-start)/60, " minutes")
-# Concatenation of data and labels for easier understanding
-data_train = np.concatenate((labels_train,data_train),axis=1)
-data_val = np.concatenate((labels_val,data_val),axis=1)
-# Setting up the train and validation dataloaders
-start  = time.time()
+data_train = df_train_full[0:45000]
+data_val = df_train_full[45000:50000]
+# Setting up the dataloader
 dataset_train = CIFAR10_train(data_train)
 train_loader = DataLoader(dataset_train,batch_size= 1,shuffle=True,num_workers=1)
 dataset_valid = CIFAR10_val(data_val)
 val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 1)
 end = time.time()
-print("Setting up dataloader took: ", (end-start)/60, " minutes")
-alexnet = models.alexnet(pretrained=True)
-print(alexnet)
+# Defining a pre-existing model in torch
+model = models.alexnet(pretrained=True)
+model.classifier[6].out_features = 10
+print(model)
+# Freezing the convolutional layer weights
+for param in model.features.parameters():
+    param.requires_grad = False
+# Freezing the classifier layer weights except the last layer
+for n in range(6):
+    for param in model.classifier[n].parameters():
+        param.requires_grad = False
 
 print("Training Data Samples: ", len(train_loader.dataset))
 
