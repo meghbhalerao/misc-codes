@@ -50,10 +50,25 @@ for row in range(data_val.shape[0]):
 end = time.time()
 print("Normalizing data took: ", (end-start)/60, " minutes")
 # Now we obtain the distance matrix with respect to the training and validation set, this gives the distance between each of the validation elements with each of the training samples
+start = time.time()
 dist_mat = DM(data_val,data_train)
+end = time.time()
+print("Preparing distance matrix took: ", (end-start)/60, " minutes")
 sorted_dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
 for val_element in range(dist_mat.shape[1]):
     sorted_dist_mat[:,val_element] = np.argsort(dist_mat[:,val_element],axis=0)
+# Using the K nearest neighbors to classify the data by using the actual class labels and the predicted class labels 
+k = 5
+sorted_dist_mat = sorted_dist_mat[0:k,:]
+pred_mat  =  np.zeros(5,dist_mat.shape[1])
+for column in range(pred_mat.shape[1]):
+    
+
+
+
+
+
+
 # Concatenation of the labels with the data
 data_train = np.concatenate((labels_train,data_train),axis=1)
 data_val = np.concatenate((labels_val,data_val),axis=1)
