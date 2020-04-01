@@ -34,13 +34,18 @@ print("Loading data took: ", (end-start)/60, " minutes")
 # Expanding dimentions of labels for concatenation with image data
 labels_train_full = np.expand_dims(labels_train_full,axis=1)
 labels_test = np.expand_dims(labels_test,axis=1)
-# Concatenation of the labels with the data
+# Normalization of the data elements
+start = time.time()
 for row in range(data_train_full.shape[0]):
-    data_train_full[row,:] = normalize(data_train_full[row,:])    
+    data_train_full[row,:] = normalize(data_train_full[row,:])  
+for row in range(data_test.shape[0]):
+    data_test[row,:] = normalize(data_test[row,:])  
+end = time.time()
+print("Normalizing data took: ", (end-start)/60, " minutes")
+# Concatenation of the labels with the data
 data_train_full = np.concatenate((labels_train_full,data_train_full),axis=1)
 data_test = np.concatenate((labels_test,data_test),axis=1)
 # Before this a random shuffling of the training data can be done once I figure out why the np shuffle funcrtion is not working
 # Splitting the training data further into training and validation data
 data_train = data_train_full[0:45000,:]
 data_val = data_train_full[45000:50000,:]
-# Preprocessing the training, validation and test data
