@@ -111,3 +111,56 @@ pred_test =  np.array([pred_test]).T
 acc_vec_test =  (pred_test - labels_test).astype(int)
 acc_test = (pred_test.shape[0] - np.count_nonzero(acc_vec_test))/pred_test.shape[0]
 print("Accuracy on test set of CIFAR-10 is: ",acc_test*100," percent")
+# Finding the best K value using brute force 
+search_range =  [3,5,7,9,11,13]
+acc_list = []
+for k in search_range:
+    k = int(k)
+    sorted_dist_mat_val = sorted_dist_mat_val[0:k,:]
+    pred_mat_val  =  np.zeros((k,dist_mat_val.shape[1]))
+    for column in range(sorted_dist_mat_val.shape[1]):
+        pred_mat_val[:,column] = labels_train[sorted_dist_mat_val[:,column].astype(int)][:,0]   
+
+    pred_val = []
+    for column in range(pred_mat_val.shape[1]):
+        pred_val.append(get_most_frequent(pred_mat_val[:,column].astype(int)))
+
+    pred_val =  np.array([pred_val]).T
+    acc_vec_val =  (pred_val - labels_val_val).astype(int)
+    acc_val = (pred_val.shape[0] - np.count_nonzero(acc_vec_val))/pred_val.shape[0]
+    print("Accuracy on validation set of CIFAR-10 is: ",acc_val*100," percent")
+    acc_list.append(acc_val)
+acc_list = np.array(acc_list)
+acc_list = np.argsort(-1*acc_list)
+print("The best validation accuracy occurs at k = ", 2*acc_list[0] + 1) 
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

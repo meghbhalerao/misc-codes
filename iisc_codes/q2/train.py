@@ -16,6 +16,10 @@ def normalize(matrix):
     sigma = np.std(matrix.flatten())
     matrix = (matrix - mean)/sigma
     return matrix 
+def MSE_loss(mat1,mat2):
+    diff = mat1.flatten() - mat2.flatten()
+    loss = sum(diff*diff)
+    return loss
     
 start = time.time()
 data_train_full = np.loadtxt("/Users/megh/Work/misc/data/cifar-10-batches-py/txt_data/data_train.txt")
@@ -57,8 +61,12 @@ print("Training Data Samples: ", len(train_loader.dataset))
 optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=False, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
 ############### CHOOSING THE LOSS FUNCTION ###################
-loss_fn = x
-
+loss_fn = MSE_loss
+###### PARAMETERS NEEDED TO BE MONITORED ##########
+train_acc = 0
+val_acc = 0
+train_loss = 0
+val_loss = 0
 ################ TRAINING THE MODEL##############
 for ep in range(num_epochs):
     start = time.time()
@@ -81,15 +89,24 @@ for ep in range(num_epochs):
 
         output = model(image.float())
         # Computing the loss
-        loss = loss_fn(output.double(), mask.double(),n_classes)
+        loss = loss_fn(output.double(), mask.double())
         # Back Propagation for model to learn
         loss.backward()
         #Updating the weight values
         optimizer.step()
-        #Pushing the dice to the cpu and only taking its value
-        
+        #Pushing the ground truth and predicted class to the cpu
+        mask = mask.cpu().detach().numpy()
+        output = output.cpu().detach().numpy()
+        temp = np.zeros((1,num_classes))
+        temp[1,np.argmax(output)] =  1
+        train_acc+=sum(mask*temp)
         scheduler.step()
+        train_loss+=loss.cpu().detach().numpy()
+    print("Training Accuracy for epoch # ", ep, " is: ",train_acc/(batch_idx+1))
+    print("Training Loss for epoch # ", ep, " is: ",train_loss/(batch_idx+1))
 
+    train_acc = 0
+    train_loss = 0
     # Now we enter the evaluation/validation part of the epoch    
     model.eval        
     for batch_idx, (subject) in enumerate(val_loader):
@@ -98,6 +115,18 @@ for ep in range(num_epochs):
             mask = subject['gt']
             image, mask = image.to(device), mask.to(device)
             output = model(image.float())
+            mask = mask.cpu().detach().numpy()
+            output = output.cpu().detach().numpy()
+            loss = loss_fn(output.double(), mask.double())
+            temp = np.zeros((1,num_classes))
+            temp[1,np.argmax(output)] = 1     
+            val_acc+=sum(mask*temp)
+            val_loss+=loss.cpu().detach().numpy()
+    print("Validation Accuracy for epoch # ",ep," is: ",val_acc/(batch_idx+1))
+    print("Validation Loss for epoch # ",ep," is: ",val_loss/(batch_idx+1))
+    val_acc = 0
+    val_loss = 0
+            
             
 
 
