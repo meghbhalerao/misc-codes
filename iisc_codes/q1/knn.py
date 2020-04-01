@@ -49,13 +49,13 @@ for row in range(data_val.shape[0]):
     data_val[row,:] = normalize(data_val[row,:])  
 end = time.time()
 print("Normalizing data took: ", (end-start)/60, " minutes")
-
+# Now we obtain the distance matrix with respect to the training and validation set, this gives the distance between each of the validation elements with each of the training samples
+dist_mat = DM(data_val,data_train)
+sorted_dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
+for val_element in range(dist_mat.shape[1]):
+    
 # Concatenation of the labels with the data
 data_train = np.concatenate((labels_train,data_train),axis=1)
 data_val = np.concatenate((labels_val,data_val),axis=1)
 data_test = np.concatenate((labels_test,data_test),axis=1)
 # Before this a random shuffling of the training data can be done once I figure out why the np shuffle funcrtion is not working
-# Splitting the training data further into training and validation data
-data_train = data_train_full[0:45000,:]
-data_val = data_train_full[45000:50000,:]
-# First we get the K value from the validation and then we use that same K value for the testing data
