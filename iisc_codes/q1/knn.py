@@ -67,7 +67,7 @@ print("Preparing arg sorted distance matrix took: ", (end-start)/60, " minutes")
 # Using the K nearest neighbors to classify the data by using the actual class labels and the predicted class labels 
 k = 5
 sorted_dist_mat_val = sorted_dist_mat_val[0:k,:]
-pred_mat  =  np.zeros((k,dist_mat_val.shape[1]))
+pred_mat_val  =  np.zeros((k,dist_mat_val.shape[1]))
 for column in range(sorted_dist_mat_val.shape[1]):
     pred_mat_val[:,column] = labels_train[sorted_dist_mat_val[:,column].astype(int)][:,0]
     
@@ -78,8 +78,33 @@ for column in range(pred_mat_val.shape[1]):
 
 pred_val =  np.array([pred_val]).T
 acc_vec_val =  (pred_val - labels_val_val).astype(int)
-acc = (pred_val.shape[0] - np.count_nonzero(acc_vec_val))/pred_val.shape[0]
-print("Accuracy on validation set of CIFAR-10 is: ",acc*100," percent")
+acc_val = (pred_val.shape[0] - np.count_nonzero(acc_vec_val))/pred_val.shape[0]
+print("Accuracy on validation set of CIFAR-10 is: ",acc_val*100," percent")
 
+# Calculating the accuracy on the testing data
+start = time.time()
+dist_mat_test = DM(data_test,data_train)
+end = time.time()
+print("Preparing distance matrix took: ", (end-start)/60, " minutes")
+sorted_dist_mat_test = np.zeros((data_train.shape[0],data_test.shape[0]))
+start = time.time()
+for test_element in range(dist_mat_test.shape[1]):
+    sorted_dist_mat_test[:,test_element] = np.argsort(dist_mat_test[:,test_element],axis=0)
+end = time.time()
+print("Preparing arg sorted distance matrix took: ", (end-start)/60, " minutes")
+# Using the K nearest neighbors to classify the data by using the actual class labels and the predicted class labels 
+k = 5
+sorted_dist_mat_test = sorted_dist_mat_test[0:k,:]
+pred_mat_test  =  np.zeros((k,dist_mat_test.shape[1]))
+for column in range(sorted_dist_mat_test.shape[1]):
+    pred_mat_test[:,column] = labels_train[sorted_dist_mat_test[:,column].astype(int)][:,0]
+    
 
+pred_test = []
+for column in range(pred_mat_test.shape[1]):
+    pred_test.append(get_most_frequent(pred_mat_test[:,column].astype(int)))
 
+pred_test =  np.array([pred_test]).T
+acc_vec_test =  (pred_test - labels_val_test).astype(int)
+acc_test = (pred_test.shape[0] - np.count_nonzero(acc_vec_test))/pred_test.shape[0]
+print("Accuracy on test set of CIFAR-10 is: ",acc_test*100," percent")
