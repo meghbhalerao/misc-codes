@@ -18,7 +18,10 @@ def get_most_frequent(array):
     return np.argmax(counts)
 
 something = 0
-def cosine_distance():
+def cosine_distance(mat1,mat2):
+    mat1 = mat1.flatten()
+    mat2 = mat2.flatten()
+    dist = 
     return something
 
 def normalize(matrix):
