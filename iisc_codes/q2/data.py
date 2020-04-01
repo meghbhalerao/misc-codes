@@ -11,7 +11,7 @@ class CIFAR10_train(Dataset):
     def __init__(self,data):
         self.data = data
     def __len__(self):
-        return data.shape[0]    
+        return self.data.shape[0]    
 
     def __getitem__(self, index):
         image = self.data[index,1:]
