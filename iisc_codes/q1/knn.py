@@ -53,6 +53,7 @@ print("Normalizing data took: ", (end-start)/60, " minutes")
 dist_mat = DM(data_val,data_train)
 sorted_dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
 for val_element in range(dist_mat.shape[1]):
+    sorted_dist_mat[:,val_element] = np.argsort(dist_mat[:,val_element],axis=0)
     
 # Concatenation of the labels with the data
 data_train = np.concatenate((labels_train,data_train),axis=1)
