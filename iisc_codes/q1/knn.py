@@ -3,12 +3,11 @@ import pickle
 import time 
 
 something = 0
-# =============================================================================
-# def get_k(data_val,data_train,K):
-#     for k in range(1,K):
-#         
-#     return something
-# =============================================================================
+def get_k(data_val,data_train,K):
+    for k in range(1,K):
+        
+        
+    return something
 
 def L2_distance():
     
@@ -49,3 +48,4 @@ data_test = np.concatenate((labels_test,data_test),axis=1)
 # Splitting the training data further into training and validation data
 data_train = data_train_full[0:45000,:]
 data_val = data_train_full[45000:50000,:]
+# First we get the K value from the validation and then we use that same K value for the testing data
