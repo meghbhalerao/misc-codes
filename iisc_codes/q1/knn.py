@@ -55,14 +55,22 @@ dist_mat = DM(data_val,data_train)
 end = time.time()
 print("Preparing distance matrix took: ", (end-start)/60, " minutes")
 sorted_dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
+start = time.time()
 for val_element in range(dist_mat.shape[1]):
     sorted_dist_mat[:,val_element] = np.argsort(dist_mat[:,val_element],axis=0)
+end = time.time()
+print("Preparing arg sorted distance matrix took: ", (end-start)/60, " minutes")
 # Using the K nearest neighbors to classify the data by using the actual class labels and the predicted class labels 
 k = 5
 sorted_dist_mat = sorted_dist_mat[0:k,:]
-pred_mat  =  np.zeros(5,dist_mat.shape[1])
-for column in range(pred_mat.shape[1]):
-    
+pred_mat  =  np.zeros((k,dist_mat.shape[1]))
+for column in range(sorted_dist_mat.shape[1]):
+    pred_mat[:,column] = labels_train[sorted_dist_mat[:,column].astype(int)][:,0]
+
+true_labels_mat = np.zeros((k,dist_mat.shape[1]))
+for column in range(sorted_dist_mat.shape[1]):
+    pred_mat[:,column] = labels_val[sorted_dist_mat[:,column].astype(int)][:,0]
+
 
 
 
