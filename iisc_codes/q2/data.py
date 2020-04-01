@@ -23,37 +23,16 @@ class CIFAR10_train(Dataset):
         if random.random() < 0.12:
             for n in range(dim-1):
                 img[n] = gaussian(img[n],True,0,0.1)   
-
-        return img,gt
-        
-    def rcrop(self,image,gt,psize):
-        imshape = image.shape
-        if imshape[1]>psize[0]:
-            xshift = random.randint(0,imshape[1]-psize[0])
-            image = image[:,xshift:xshift+psize[0],:,:]
-            gt = gt[xshift:xshift+psize[0],:,:]
-        if imshape[2]>psize[1]:
-            yshift = random.randint(0,imshape[2]-psize[1])
-            image = image[:,:,yshift:yshift+psize[1],:]
-            gt = gt[:,yshift:yshift+psize[1],:]
-        if imshape[3]>psize[2]:
-            zshift = random.randint(0,imshape[3]-psize[2])
-            image = image[:,:,:,zshift:zshift+psize[2]]
-            gt = gt[:,:,zshift:zshift+psize[2]]
-        return image,gt
+        return img,gt        
 
     def __getitem__(self, index):
-        psize = self.psize
-        imshape = nib.load(self.df.iloc[index,0]).get_fdata().shape
-        dim = self.df.shape[1]
-        im_stack =  np.zeros((dim-1,*imshape),dtype=int)
-        for n in range(0,dim-1):
-            image = self.df.iloc[index,n]
-            image = nib.load(image).get_fdata()
-            im_stack[n] = image                
-        gt = nib.load(self.df.iloc[index,dim-1]).get_fdata()   
-        im_stack,gt = self.rcrop(im_stack,gt,psize)
-        gt = one_hot(gt)
-        im_stack, gt = self.transform(im_stack, gt, dim)
+        image = self.data[index,1:]
+        r = image[0:1024]
+        r = r.reshape(32,32)
+        g = image[1024:2048]
+        g = g.reshape(32,32)
+        b = image[2048:3072]
+        b = b.reshape(32,32)
+        gt = self.data[index,0]
         sample = {'image': im_stack, 'gt' : gt}
         return sample
