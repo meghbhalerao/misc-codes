@@ -3,11 +3,12 @@ import pickle
 import time 
 
 something = 0
-def get_k(data_val,data_train,K):
-    for k in range(1,K):
-        
-        
-    return something
+def DM(data_val,data_train):
+    dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
+    for sample_val in range(data_val.shape[0]):
+        for sample_train in range(data_train[0]):
+            dist_mat[sample_val,sample_train] = L2_distance(data_val[sample_val,1:],data_train[sample_train,1:])         
+    return dist_mat
 
 def L2_distance():
     
