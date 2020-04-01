@@ -20,6 +20,9 @@ data_test = np.loadtxt("/Users/megh/Work/misc/data/cifar-10-batches-py/txt_data/
 labels_test = np.loadtxt("/Users/megh/Work/misc/data/cifar-10-batches-py/txt_data/labels_test.txt")
 end = time.time()
 print("Loading data took: ", (end-start)/60, " minutes")
-# Expanding dimenrtions of labels for concatenation with image data
+# Expanding dimentions of labels for concatenation with image data
 labels_train = np.expand_dims(labels_train,axis=1)
 labels_test = np.expand_dims(labels_test,axis=1)
+# Concatenation of the labels with the data
+data_train = np.concatenate((labels_train,data_train),axis=1)
+data_test = np.concatenate((labels_test,data_test),axis=1)
