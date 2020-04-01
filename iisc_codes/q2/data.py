@@ -6,19 +6,12 @@ import os
 import random
 import scipy
 
-class CIFAR10(Dataset):
-    def __init__(self,df,psize):
-        self.df = df
-        self.psize = psize
+class CIFAR10_train(Dataset):
+    def __init__(self,data):
+        self.data = data
     def __len__(self):
-        return len(self.df)
+        return data.shape[0]
     def transform(self,img ,gt, dim):
-        if random.random()<0.12:
-            img, gt = augment_rot90(img, gt)
-            img, gt = img.copy(), gt.copy()         
-        if random.random()<0.12:
-            img, gt = augment_mirroring(img, gt)
-            img, gt = img.copy(), gt.copy()
         if random.random()<0.12:
             img = scipy.ndimage.rotate(img,45,axes=(2,1,0),reshape=False,mode='constant')
             gt = scipy.ndimage.rotate(gt,45,axes=(2,1,0),reshape=False,order=0) 
