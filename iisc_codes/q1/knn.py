@@ -2,7 +2,6 @@ import numpy as np
 import pickle
 import time 
 
-something = 0
 def DM(data_val,data_train):
     dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
     for sample_val in range(data_val.shape[0]):
@@ -10,6 +9,7 @@ def DM(data_val,data_train):
             dist_mat[sample_val,sample_train] = L2_distance(data_val[sample_val,1:],data_train[sample_train,1:])         
     return dist_mat
 
+something = 0
 def L2_distance():
     
     return something
@@ -34,16 +34,25 @@ print("Loading data took: ", (end-start)/60, " minutes")
 # Expanding dimentions of labels for concatenation with image data
 labels_train_full = np.expand_dims(labels_train_full,axis=1)
 labels_test = np.expand_dims(labels_test,axis=1)
+# Defining the train and validation sets clearly
+data_train = data_train_full[0:45000,:]
+data_val = data_train_full[45000:50000,:]
+labels_train = labels_train_full[0:45000,:]
+labels_val = labels_train_full[45000:50000,:]
 # Normalization of the data elements
 start = time.time()
-for row in range(data_train_full.shape[0]):
-    data_train_full[row,:] = normalize(data_train_full[row,:])  
+for row in range(data_train.shape[0]):
+    data_train[row,:] = normalize(data_train[row,:])  
 for row in range(data_test.shape[0]):
     data_test[row,:] = normalize(data_test[row,:])  
+for row in range(data_val.shape[0]):
+    data_val[row,:] = normalize(data_val[row,:])  
 end = time.time()
 print("Normalizing data took: ", (end-start)/60, " minutes")
+
 # Concatenation of the labels with the data
-data_train_full = np.concatenate((labels_train_full,data_train_full),axis=1)
+data_train = np.concatenate((labels_train,data_train),axis=1)
+data_val = np.concatenate((labels_val,data_val),axis=1)
 data_test = np.concatenate((labels_test,data_test),axis=1)
 # Before this a random shuffling of the training data can be done once I figure out why the np shuffle funcrtion is not working
 # Splitting the training data further into training and validation data
