@@ -6,7 +6,7 @@ def DM(data_val,data_train):
     dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
     for sample_val in range(data_val.shape[0]):
         for sample_train in range(data_train.shape[0]):
-            dist_mat[sample_val,sample_train] = L2_distance(data_val[sample_val,1:],data_train[sample_train,1:])         
+            dist_mat[sample_train,sample_val] = L2_distance(data_val[sample_val,1:],data_train[sample_train,1:])         
     return dist_mat
 
 def L2_distance(mat1,mat2):
@@ -54,9 +54,11 @@ dist_mat = DM(data_val,data_train)
 sorted_dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
 for val_element in range(dist_mat.shape[1]):
     sorted_dist_mat[:,val_element] = np.argsort(dist_mat[:,val_element],axis=0)
-    
 # Concatenation of the labels with the data
 data_train = np.concatenate((labels_train,data_train),axis=1)
 data_val = np.concatenate((labels_val,data_val),axis=1)
 data_test = np.concatenate((labels_test,data_test),axis=1)
 # Before this a random shuffling of the training data can be done once I figure out why the np shuffle funcrtion is not working
+
+
+
