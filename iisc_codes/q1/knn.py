@@ -21,8 +21,8 @@ something = 0
 def cosine_distance(mat1,mat2):
     mat1 = mat1.flatten()
     mat2 = mat2.flatten()
-    dist = 
-    return something
+    dist = (mat1*mat2)/(np.linalg.norm(mat1)*np.linalg.norm(mat2))
+    return dist
 
 def normalize(matrix):
     mean = np.mean(matrix.flatten())
