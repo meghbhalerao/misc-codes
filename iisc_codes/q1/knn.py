@@ -12,6 +12,9 @@ def DM(data_val,data_train):
 def L2_distance(mat1,mat2):
     dist = np.linalg.norm(mat1-mat2)    
     return dist
+def get_most_frequent(array):
+    counts = np.bincount(a)
+    return np.argmax(counts)
 
 something = 0
 def cosine_distance():
@@ -66,10 +69,6 @@ sorted_dist_mat = sorted_dist_mat[0:k,:]
 pred_mat  =  np.zeros((k,dist_mat.shape[1]))
 for column in range(sorted_dist_mat.shape[1]):
     pred_mat[:,column] = labels_train[sorted_dist_mat[:,column].astype(int)][:,0]
-
-true_labels_mat = np.zeros((k,dist_mat.shape[1]))
-for column in range(sorted_dist_mat.shape[1]):
-    pred_mat[:,column] = labels_val[sorted_dist_mat[:,column].astype(int)][:,0]
 
 
 
