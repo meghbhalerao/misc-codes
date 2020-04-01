@@ -12,8 +12,9 @@ def DM(data_val,data_train):
 def L2_distance(mat1,mat2):
     dist = np.linalg.norm(mat1-mat2)    
     return dist
+
 def get_most_frequent(array):
-    counts = np.bincount(a)
+    counts = np.bincount(array)
     return np.argmax(counts)
 
 something = 0
@@ -54,33 +55,31 @@ end = time.time()
 print("Normalizing data took: ", (end-start)/60, " minutes")
 # Now we obtain the distance matrix with respect to the training and validation set, this gives the distance between each of the validation elements with each of the training samples
 start = time.time()
-dist_mat = DM(data_val,data_train)
+dist_mat_val = DM(data_val,data_train)
 end = time.time()
 print("Preparing distance matrix took: ", (end-start)/60, " minutes")
-sorted_dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
+sorted_dist_mat_val = np.zeros((data_train.shape[0],data_val.shape[0]))
 start = time.time()
-for val_element in range(dist_mat.shape[1]):
-    sorted_dist_mat[:,val_element] = np.argsort(dist_mat[:,val_element],axis=0)
+for val_element in range(dist_mat_val.shape[1]):
+    sorted_dist_mat_val[:,val_element] = np.argsort(dist_mat_val[:,val_element],axis=0)
 end = time.time()
 print("Preparing arg sorted distance matrix took: ", (end-start)/60, " minutes")
 # Using the K nearest neighbors to classify the data by using the actual class labels and the predicted class labels 
 k = 5
-sorted_dist_mat = sorted_dist_mat[0:k,:]
-pred_mat  =  np.zeros((k,dist_mat.shape[1]))
-for column in range(sorted_dist_mat.shape[1]):
-    pred_mat[:,column] = labels_train[sorted_dist_mat[:,column].astype(int)][:,0]
+sorted_dist_mat_val = sorted_dist_mat_val[0:k,:]
+pred_mat  =  np.zeros((k,dist_mat_val.shape[1]))
+for column in range(sorted_dist_mat_val.shape[1]):
+    pred_mat_val[:,column] = labels_train[sorted_dist_mat_val[:,column].astype(int)][:,0]
+    
 
+pred_val = []
+for column in range(pred_mat_val.shape[1]):
+    pred_val.append(get_most_frequent(pred_mat_val[:,column].astype(int)))
 
-
-
-
-
-
-# Concatenation of the labels with the data
-data_train = np.concatenate((labels_train,data_train),axis=1)
-data_val = np.concatenate((labels_val,data_val),axis=1)
-data_test = np.concatenate((labels_test,data_test),axis=1)
-# Before this a random shuffling of the training data can be done once I figure out why the np shuffle funcrtion is not working
+pred_val =  np.array([pred_val]).T
+acc_vec_val =  (pred_val - labels_val_val).astype(int)
+acc = (pred_val.shape[0] - np.count_nonzero(acc_vec_val))/pred_val.shape[0]
+print("Accuracy on validation set of CIFAR-10 is: ",acc*100," percent")
 
 
 
