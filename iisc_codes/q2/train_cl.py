@@ -77,17 +77,17 @@ for ep in range(num_epochs):
         feature = feature_model(image.float())
         # Computing the loss
         mask = mask.T
-        
+        # Combination of the center loss and standard MSE loss
         loss = center_loss(feature.double(), mask[0,:].double())*alpha + MSE_loss(output.double(), mask.double())
-        # multiple (1./alpha) in order to remove the effect of alpha on updating centers
+        # Backpropagation of the loss
         loss.backward()
-
+        # Updating the parameters of the center loss
         for param in center_loss.parameters():
             param.grad.data *= (1./alpha)
        
+        # Updating the parameters of the center loss as well as the network
         optimizer_centloss.step()
         optimizer_centloss.zero_grad()
-        # Back Propagation for model to learn
         #Updating the weight values
         optimizer.step()
         #Pushing the ground truth and predicted class to the cpu
@@ -102,7 +102,7 @@ for ep in range(num_epochs):
 
     train_acc = 0
     train_loss = 0
-    # Now we enter the evaluation/validation part of the epoch    
+    # Now we enter the evaluation/validation part of the epoch - this is same with or without the center loss 
     model.eval        
     for batch_idx, (subject) in enumerate(val_loader):
         with torch.no_grad():
