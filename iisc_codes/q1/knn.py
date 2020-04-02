@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 import time 
 
+# This function is for calculating the distance matrix, which gives the pairwise distance between every element of any two datasets
 def DM(data_val,data_train):
     dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
     for sample_val in range(data_val.shape[0]):
