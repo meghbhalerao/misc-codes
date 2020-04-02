@@ -79,22 +79,22 @@ for ep in range(num_epochs):
         mask = mask.T
         
         loss = center_loss(feature.double(), mask[0,:].double())*alpha + MSE_loss(output.double(), mask.double())
-        optimizer_centloss.zero_grad()
         # multiple (1./alpha) in order to remove the effect of alpha on updating centers
+        loss.backward()
+
         for param in center_loss.parameters():
             param.grad.data *= (1./alpha)
        
         optimizer_centloss.step()
-        
+        optimizer_centloss.zero_grad()
         # Back Propagation for model to learn
-        loss.backward()
         #Updating the weight values
         optimizer.step()
         #Pushing the ground truth and predicted class to the cpu
         mask = mask.cpu().detach().numpy()
         output = output.cpu().detach().numpy()
         temp = np.zeros((1,num_classes))
-        temp[1,np.argmax(output)] =  1
+        temp[0,np.argmax(output)] =  1
         train_acc+=sum(mask*temp)
         train_loss+=loss.cpu().detach().numpy()
     print("Training Accuracy for epoch # ", ep, " is: ",train_acc/(batch_idx+1))
@@ -114,7 +114,7 @@ for ep in range(num_epochs):
             output = output.cpu().detach().numpy()
             loss = loss_fn(output.double(), mask.double())
             temp = np.zeros((1,num_classes))
-            temp[1,np.argmax(output)] = 1     
+            temp[0,np.argmax(output)] = 1     
             val_acc+=sum(mask*temp)
             val_loss+=loss.cpu().detach().numpy()
     print("Validation Accuracy for epoch # ",ep," is: ",val_acc/(batch_idx+1))
