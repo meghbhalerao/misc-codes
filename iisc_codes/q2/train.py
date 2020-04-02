@@ -30,6 +30,12 @@ val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=False,num_workers = 
 # Defining a pre-existing model in torch
 model = models.alexnet(pretrained=True)
 model.classifier[6].out_features = 10
+drop = False
+if drop == True:
+    modules=list(model.children())[0]
+    del(modules[10])
+
+    
 # Freezing the convolutional layer weights
 for param in model.features.parameters():
     param.requires_grad = False

@@ -79,6 +79,7 @@ for ep in range(num_epochs):
         # multiple (1./alpha) in order to remove the effect of alpha on updating centers
         for param in center_loss.parameters():
             param.grad.data *= (1./alpha)
+       
         optimizer_centloss.step()
         
         # Back Propagation for model to learn
