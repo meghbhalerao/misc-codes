@@ -10,21 +10,21 @@ def DM(data_val,data_train):
             dist_mat[sample_train,sample_val] = L2_distance(data_val[sample_val,1:], data_train[sample_train,1:])         
     return dist_mat
 
+# Standard euclidian norm for distance calculation 
 def L2_distance(mat1,mat2):
     dist = np.linalg.norm(mat1-mat2)    
     return dist
-
+# Get the most frequently occuring label - i.e. most frequently occuring element of the array 
 def get_most_frequent(array):
     counts = np.bincount(array)
     return np.argmax(counts)
-
-something = 0
+# Defining the cosine similarity distance between two arrays/vectors - essentially calculates the cosine of the "angle" between the two multidimensional vectors
 def cosine_distance(mat1,mat2):
     mat1 = mat1.flatten()
     mat2 = mat2.flatten()
     dist = (mat1*mat2)/(np.linalg.norm(mat1)*np.linalg.norm(mat2))
     return dist
-
+# Z scorinf of the flattened vector
 def normalize(matrix):
     mean = np.mean(matrix.flatten())
     sigma = np.std(matrix.flatten())
