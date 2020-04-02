@@ -1,3 +1,4 @@
+# Same as the train loader except name of the dataset class
 import torch
 from torch.utils.data.dataset import Dataset
 import numpy as np

@@ -13,6 +13,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import pandas as pd
 import datetime
 
+# Using the mean squared error loss for the network to train
 def MSE_loss(mat1,mat2):
     diff = mat1.flatten() - mat2.flatten()
     loss = sum(diff*diff)
@@ -29,15 +30,13 @@ dataset_valid = CIFAR10_val(data_val)
 val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=False,num_workers = 4)
 # Defining a pre-existing model in torch
 model = models.alexnet(pretrained=True)
+# Modifying the last layer of the model to make the output equal to the number of classes of cifar10
 model.classifier[6] = nn.Linear(4096,num_classes)
-
 # Dropping or deleting the last convolutional layer conditionlly
 drop = True
 if drop == True:
     modules=list(model.children())[0]
     del(modules[10])
-
-    
 # Freezing the convolutional layer weights
 for param in model.features.parameters():
     param.requires_grad = False
@@ -48,8 +47,9 @@ for n in range(6):
 
 print("Training Data Samples: ", len(train_loader))
 
-
+# Setting up the optimizer
 optimizer = optim.Adam(model.classifier[6].parameters(), lr = 0.1, betas = (0.9,0.999), weight_decay = 0.00005)
+# Setting a lerning rate scheduler conditioned on the rate of change of loss function and updating the learning rate conditionally after every epoch
 scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, verbose=False, threshold=0.003, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
 ############### CHOOSING THE LOSS FUNCTION ###################
 loss_fn = MSE_loss
@@ -96,7 +96,7 @@ for ep in range(num_epochs):
 
     train_acc = 0
     train_loss = 0
-    # Now we enter the evaluation/validation part of the epoch    
+    # Now we enter the validation part of the epoch    
     model.eval        
     for batch_idx, (subject) in enumerate(val_loader):
         with torch.no_grad():
