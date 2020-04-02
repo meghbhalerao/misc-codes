@@ -11,6 +11,7 @@ from data_val import CIFAR10_val
 from torch.utils.data import Dataset, DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import pandas as pd
+import datetime
 
 def MSE_loss(mat1,mat2):
     diff = mat1.flatten() - mat2.flatten()
@@ -30,7 +31,6 @@ end = time.time()
 # Defining a pre-existing model in torch
 model = models.alexnet(pretrained=True)
 model.classifier[6].out_features = 10
-print(model)
 # Freezing the convolutional layer weights
 for param in model.features.parameters():
     param.requires_grad = False
@@ -42,8 +42,8 @@ for n in range(6):
 print("Training Data Samples: ", len(train_loader.dataset))
 
 
-optimizer = optim.Adam(model.parameters(), lr = learning_rate, betas = (0.9,0.999), weight_decay = 0.00005)
-scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=False, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
+optimizer = optim.Adam(model.classifier[6].parameters(), lr = 0.1, betas = (0.9,0.999), weight_decay = 0.00005)
+scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, verbose=False, threshold=0.003, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
 ############### CHOOSING THE LOSS FUNCTION ###################
 loss_fn = MSE_loss
 ###### PARAMETERS NEEDED TO BE MONITORED ##########
@@ -51,7 +51,8 @@ train_acc = 0
 val_acc = 0
 train_loss = 0
 val_loss = 0
-################ TRAINING THE MODEL##############
+num_epochs = 100
+################ TRAINING THE MODEL ##############
 for ep in range(num_epochs):
     start = time.time()
     print("\n")
@@ -60,7 +61,6 @@ for ep in range(num_epochs):
     print("Learning rate:", optimizer.param_groups[0]['lr'])
     model.train
     for batch_idx, (subject) in enumerate(train_loader):
-        
         # Load the subject and its ground truth
         image = subject['image']
         mask = subject['gt']
@@ -84,7 +84,6 @@ for ep in range(num_epochs):
         temp = np.zeros((1,num_classes))
         temp[1,np.argmax(output)] =  1
         train_acc+=sum(mask*temp)
-        scheduler.step()
         train_loss+=loss.cpu().detach().numpy()
     print("Training Accuracy for epoch # ", ep, " is: ",train_acc/(batch_idx+1))
     print("Training Loss for epoch # ", ep, " is: ",train_loss/(batch_idx+1))
@@ -108,8 +107,12 @@ for ep in range(num_epochs):
             val_loss+=loss.cpu().detach().numpy()
     print("Validation Accuracy for epoch # ",ep," is: ",val_acc/(batch_idx+1))
     print("Validation Loss for epoch # ",ep," is: ",val_loss/(batch_idx+1))
+    scheduler.step(val_acc)
     val_acc = 0
     val_loss = 0
+    end = time.time()
+    print("Time taken for this epoch is: ", (end-start)/60, "minutes")
+
             
             
 

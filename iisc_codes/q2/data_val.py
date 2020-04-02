@@ -19,7 +19,7 @@ class CIFAR10_val(Dataset):
         one_hot[1,label-1] = 1
         return one_hot
     
-    def normalize(matrix):
+    def normalize(self,matrix):
         mean = np.mean(matrix.flatten())
         sigma = np.std(matrix.flatten())
         matrix = (matrix - mean)/sigma
@@ -40,6 +40,6 @@ class CIFAR10_val(Dataset):
         im_stack[0] = r
         im_stack[1] = g
         im_stack[2] = b
-        gt = self.one_hot(self.data[index,0],10)
+        gt = self.one_hot(self.df[index,0],10)
         sample = {'image': im_stack, 'gt' : gt}
         return sample
