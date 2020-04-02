@@ -24,12 +24,14 @@ data_train = df_train_full[0:45000]
 data_val = df_train_full[45000:50000]
 # Setting up the dataloader
 dataset_train = CIFAR10_train(data_train)
-train_loader = DataLoader(dataset_train,batch_size= 1,shuffle=False,num_workers=4)
+train_loader = DataLoader(dataset_train,batch_size=1,shuffle=False,num_workers=4)
 dataset_valid = CIFAR10_val(data_val)
 val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=False,num_workers = 4)
 # Defining a pre-existing model in torch
 model = models.alexnet(pretrained=True)
 model.classifier[6].out_features = 10
+
+# Dropping or deleting the last convolutional layer conditionlly
 drop = False
 if drop == True:
     modules=list(model.children())[0]

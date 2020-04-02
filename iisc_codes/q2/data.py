@@ -8,7 +8,6 @@ import scipy
 import scipy.ndimage as snd
 import imageio
 
-
 class CIFAR10_train(Dataset):
     def __init__(self,df):
         self.df = df
