@@ -6,7 +6,7 @@ def DM(data_val,data_train):
     dist_mat = np.zeros((data_train.shape[0],data_val.shape[0]))
     for sample_val in range(data_val.shape[0]):
         for sample_train in range(data_train.shape[0]):
-            dist_mat[sample_train,sample_val] = L2_distance(data_val[sample_val,1:],data_train[sample_train,1:])         
+            dist_mat[sample_train,sample_val] = L2_distance(data_val[sample_val,1:], data_train[sample_train,1:])         
     return dist_mat
 
 def L2_distance(mat1,mat2):
