@@ -40,18 +40,17 @@ print("Training Data Samples: ", len(train_loader))
 
 # Using center loss 
 center_loss = CenterLoss(num_classes=10, feat_dim=2, use_gpu=False)
-
+optimizer_centloss = torch.optim.SGD(center_loss.parameters(), lr=0.5)
 
 optimizer = optim.Adam(model.classifier[6].parameters(), lr = 0.1, betas = (0.9,0.999), weight_decay = 0.00005)
 scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, verbose=False, threshold=0.003, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
-############### CHOOSING THE LOSS FUNCTION ###################
-loss_fn = MSE_loss
 ###### PARAMETERS NEEDED TO BE MONITORED ##########
 train_acc = 0
 val_acc = 0
 train_loss = 0
 val_loss = 0
 num_epochs = 100
+alpha = 0.1
 print(train_loader)
 ################ TRAINING THE MODEL ##############
 for ep in range(num_epochs):
@@ -74,7 +73,14 @@ for ep in range(num_epochs):
 
         output = model(image.float())
         # Computing the loss
-        loss = loss_fn(output.double(), mask.double())
+        loss = center_loss(features, mask.double())*alpha
+        optimizer_centloss.zero_grad()
+        loss.backward()
+        # multiple (1./alpha) in order to remove the effect of alpha on updating centers
+        for param in center_loss.parameters():
+            param.grad.data *= (1./alpha)
+        optimizer_centloss.step()
+        
         # Back Propagation for model to learn
         loss.backward()
         #Updating the weight values
