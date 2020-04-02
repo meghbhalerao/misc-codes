@@ -12,11 +12,9 @@ from torch.utils.data import Dataset, DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import pandas as pd
 import datetime
+from center_loss import CenterLoss
 
-def MSE_loss(mat1,mat2):
-    diff = mat1.flatten() - mat2.flatten()
-    loss = sum(diff*diff)
-    return loss
+
     
 df_train_full = pd.read_csv("train.csv")
 # Defining the train and validation sets clearly
@@ -39,6 +37,9 @@ for n in range(6):
         param.requires_grad = False
 
 print("Training Data Samples: ", len(train_loader))
+
+# Using center loss 
+center_loss = CenterLoss(num_classes=10, feat_dim=2, use_gpu=False)
 
 
 optimizer = optim.Adam(model.classifier[6].parameters(), lr = 0.1, betas = (0.9,0.999), weight_decay = 0.00005)

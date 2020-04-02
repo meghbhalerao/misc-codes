@@ -12,9 +12,11 @@ import imageio
 class CIFAR10_train(Dataset):
     def __init__(self,df):
         self.df = df
+        
     def __len__(self):
         return len(self.df)
-    def one_hot(label,num_classes):
+    
+    def one_hot(self,label,num_classes):
         one_hot = np.zeros((1,num_classes))
         one_hot[1,label-1] = 1
         return one_hot
@@ -29,10 +31,10 @@ class CIFAR10_train(Dataset):
         image = self.df.iloc[index,0]
         gt = int(self.df.iloc[index,1])
         image = imageio.imread(image)
+        image = self.normalize(image)
         r = image[:,:,0]
         g = image[:,:,1]
         b = image[:,:,2]
-        r = self.normalize(r)
         r = snd.zoom(r,7)
         g = snd.zoom(g,7)
         b = snd.zoom(b,7)
