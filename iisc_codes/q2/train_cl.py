@@ -18,19 +18,19 @@ def MSE_loss(mat1,mat2):
     diff = mat1.flatten() - mat2.flatten()
     loss = sum(diff*diff)
     return loss
-    
+num_classes = 10
 df_train_full = pd.read_csv("train.csv")
 # Defining the train and validation sets clearly
 data_train = df_train_full[0:45000]
 data_val = df_train_full[45000:50000]
 # Setting up the dataloader
 dataset_train = CIFAR10_train(data_train)
-train_loader = DataLoader(dataset_train,batch_size= 1,shuffle=False,num_workers=4)
+train_loader = DataLoader(dataset_train,batch_size= 1,shuffle=True,num_workers=4)
 dataset_valid = CIFAR10_val(data_val)
-val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=False,num_workers = 4)
+val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 4)
 # Defining a pre-existing model in torch
 model = models.alexnet(pretrained=True)
-model.classifier[6].out_features = 10
+model.classifier[6] = nn.Linear(4096,num_classes)
 # Freezing the convolutional layer weights
 for param in model.features.parameters():
     param.requires_grad = False
@@ -40,12 +40,11 @@ for n in range(6):
         param.requires_grad = False
 
 feature_model = copy.deepcopy(model)
-
-
+del(feature_model.classifier[6])
 print("Training Data Samples: ", len(train_loader))
 
-# Using center loss 
-center_loss = CenterLoss(num_classes=10, feat_dim=2, use_gpu=False)
+# Using center loss and defining the parameters needed for the ceneter loss
+center_loss = CenterLoss(num_classes, feat_dim=4096, use_gpu=False)
 optimizer_centloss = torch.optim.SGD(center_loss.parameters(), lr=0.5)
 
 optimizer = optim.Adam(model.classifier[6].parameters(), lr = 0.1, betas = (0.9,0.999), weight_decay = 0.00005)
@@ -74,12 +73,13 @@ for ep in range(num_epochs):
         #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
         # Making sure that the optimizer has been reset
         optimizer.zero_grad()
-
         output = model(image.float())
+        feature = feature_model(image.float())
         # Computing the loss
-        loss = center_loss(torch.tensor([[1,1],[1,1]]).double(), mask.double())*alpha + MSE_loss(output.double(), mask.double())
+        mask = mask.T
+        
+        loss = center_loss(feature.double(), mask[0,:].double())*alpha + MSE_loss(output.double(), mask.double())
         optimizer_centloss.zero_grad()
-        loss.backward()
         # multiple (1./alpha) in order to remove the effect of alpha on updating centers
         for param in center_loss.parameters():
             param.grad.data *= (1./alpha)
