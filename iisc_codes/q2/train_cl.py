@@ -43,7 +43,7 @@ feature_model = copy.deepcopy(model)
 del(feature_model.classifier[6])
 print("Training Data Samples: ", len(train_loader))
 
-# Using center loss and defining the parameters needed for the ceneter loss
+# Using center loss and defining the parameters needed for the center loss
 center_loss = CenterLoss(num_classes, feat_dim=4096, use_gpu=False)
 optimizer_centloss = torch.optim.SGD(center_loss.parameters(), lr=0.5)
 
