@@ -17,7 +17,7 @@ def MSE_loss(mat1,mat2):
     diff = mat1.flatten() - mat2.flatten()
     loss = sum(diff*diff)
     return loss
-    
+num_classes = 10   
 df_train_full = pd.read_csv("train.csv")
 # Defining the train and validation sets clearly
 data_train = df_train_full[0:45000]
@@ -29,10 +29,10 @@ dataset_valid = CIFAR10_val(data_val)
 val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=False,num_workers = 4)
 # Defining a pre-existing model in torch
 model = models.alexnet(pretrained=True)
-model.classifier[6].out_features = 10
+model.classifier[6] = nn.Linear(4096,num_classes)
 
 # Dropping or deleting the last convolutional layer conditionlly
-drop = False
+drop = True
 if drop == True:
     modules=list(model.children())[0]
     del(modules[10])
@@ -59,7 +59,6 @@ val_acc = 0
 train_loss = 0
 val_loss = 0
 num_epochs = 100
-print(train_loader)
 ################ TRAINING THE MODEL ##############
 for ep in range(num_epochs):
     start = time.time()
@@ -75,10 +74,9 @@ for ep in range(num_epochs):
         # Loading images into the GPU and ignoring the affine
         image, mask = image.float(), mask.float()
         #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
-        image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
+        #image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
         # Making sure that the optimizer has been reset
         optimizer.zero_grad()
-
         output = model(image.float())
         # Computing the loss
         loss = loss_fn(output.double(), mask.double())
@@ -90,7 +88,7 @@ for ep in range(num_epochs):
         mask = mask.cpu().detach().numpy()
         output = output.cpu().detach().numpy()
         temp = np.zeros((1,num_classes))
-        temp[1,np.argmax(output)] =  1
+        temp[0,np.argmax(output)] =  1
         train_acc+=sum(mask*temp)
         train_loss+=loss.cpu().detach().numpy()
     print("Training Accuracy for epoch # ", ep, " is: ",train_acc/(batch_idx+1))
@@ -104,13 +102,12 @@ for ep in range(num_epochs):
         with torch.no_grad():
             image = subject['image']
             mask = subject['gt']
-            image, mask = image.to(device), mask.to(device)
             output = model(image.float())
             mask = mask.cpu().detach().numpy()
             output = output.cpu().detach().numpy()
             loss = loss_fn(output.double(), mask.double())
             temp = np.zeros((1,num_classes))
-            temp[1,np.argmax(output)] = 1     
+            temp[0,np.argmax(output)] = 1     
             val_acc+=sum(mask*temp)
             val_loss+=loss.cpu().detach().numpy()
     print("Validation Accuracy for epoch # ",ep," is: ",val_acc/(batch_idx+1))

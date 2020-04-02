@@ -13,8 +13,11 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import pandas as pd
 import datetime
 from center_loss import CenterLoss
-
-
+import copy
+def MSE_loss(mat1,mat2):
+    diff = mat1.flatten() - mat2.flatten()
+    loss = sum(diff*diff)
+    return loss
     
 df_train_full = pd.read_csv("train.csv")
 # Defining the train and validation sets clearly
@@ -36,6 +39,9 @@ for n in range(6):
     for param in model.classifier[n].parameters():
         param.requires_grad = False
 
+feature_model = copy.deepcopy(model)
+
+
 print("Training Data Samples: ", len(train_loader))
 
 # Using center loss 
@@ -51,7 +57,6 @@ train_loss = 0
 val_loss = 0
 num_epochs = 100
 alpha = 0.1
-print(train_loader)
 ################ TRAINING THE MODEL ##############
 for ep in range(num_epochs):
     start = time.time()
@@ -67,13 +72,12 @@ for ep in range(num_epochs):
         # Loading images into the GPU and ignoring the affine
         image, mask = image.float(), mask.float()
         #Variable class is deprecated - parameteters to be given are the tensor, whether it requires grad and the function that created it   
-        image, mask = Variable(image, requires_grad = True), Variable(mask, requires_grad = True)
         # Making sure that the optimizer has been reset
         optimizer.zero_grad()
 
         output = model(image.float())
         # Computing the loss
-        loss = center_loss(features, mask.double())*alpha
+        loss = center_loss(torch.tensor([[1,1],[1,1]]).double(), mask.double())*alpha + MSE_loss(output.double(), mask.double())
         optimizer_centloss.zero_grad()
         loss.backward()
         # multiple (1./alpha) in order to remove the effect of alpha on updating centers

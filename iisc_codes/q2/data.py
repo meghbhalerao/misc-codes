@@ -17,7 +17,7 @@ class CIFAR10_train(Dataset):
     
     def one_hot(self,label,num_classes):
         one_hot = np.zeros((1,num_classes))
-        one_hot[1,label-1] = 1
+        one_hot[0,label-1] = 1
         return one_hot
     
     def normalize(self,matrix):
@@ -41,8 +41,7 @@ class CIFAR10_train(Dataset):
         im_stack[0] = r
         im_stack[1] = g
         im_stack[2] = b
-        gt = self.one_hot(self.df[index,0],10)
-        print(gt)
-        print(image)
+        gt = self.one_hot(gt,10)
+        gt = gt[0]
         subject = {'image': im_stack, 'gt' : gt}
         return subject
