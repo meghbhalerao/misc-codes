@@ -31,7 +31,7 @@ def normalize(matrix):
     matrix = (matrix - mean)/sigma
     return matrix 
     
-
+# Loading the data which is converted to a text file
 start = time.time()
 data_train_full = np.loadtxt("/Users/megh/Work/misc/data/cifar-10-batches-py/txt_data/data_train.txt")
 labels_train_full = np.loadtxt("/Users/megh/Work/misc/data/cifar-10-batches-py/txt_data/labels_train.txt")
@@ -135,33 +135,4 @@ acc_list = np.array(acc_list)
 acc_list = np.argsort(-1*acc_list)
 print("The best validation accuracy occurs at k = ", 2*acc_list[0] + 1) 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Please note that similar code can be modified to modified to incorporate the cosine similarity distance by just replaceing the distance metric in the DM function

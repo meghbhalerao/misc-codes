@@ -14,18 +14,18 @@ class CIFAR10_train(Dataset):
         
     def __len__(self):
         return len(self.df)
-    
+    # One-hot encoding of the ground truth labels
     def one_hot(self,label,num_classes):
         one_hot = np.zeros((1,num_classes))
         one_hot[0,label-1] = 1
         return one_hot
-    
+    # Z scoring of the RGB image
     def normalize(self,matrix):
         mean = np.mean(matrix.flatten())
         sigma = np.std(matrix.flatten())
         matrix = (matrix - mean)/sigma
         return matrix 
-        
+     # Defining the getitem function to give the image and the corresponding gt label   
     def __getitem__(self, index):
         image = self.df.iloc[index,0]
         gt = int(self.df.iloc[index,1])
