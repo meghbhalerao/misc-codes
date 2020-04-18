@@ -89,7 +89,8 @@ for ep in range(num_epochs):
         output = output.cpu().detach().numpy()
         temp = np.zeros((1,num_classes))
         temp[0,np.argmax(output)] =  1
-        train_acc+=sum(mask*temp)
+        train_acc+=sum(sum(mask*temp))
+        print(mask,temp)
         train_loss+=loss.cpu().detach().numpy()
     print("Training Accuracy for epoch # ", ep, " is: ",train_acc/(batch_idx+1))
     print("Training Loss for epoch # ", ep, " is: ",train_loss/(batch_idx+1))
@@ -105,10 +106,12 @@ for ep in range(num_epochs):
             output = model(image.float())
             mask = mask.cpu().detach().numpy()
             output = output.cpu().detach().numpy()
+            torch.tensor(mask)
+            torch.tensor(output)
             loss = loss_fn(output.double(), mask.double())
             temp = np.zeros((1,num_classes))
             temp[0,np.argmax(output)] = 1     
-            val_acc+=sum(mask*temp)
+            val_acc+=sum(sum(mask*temp))
             val_loss+=loss.cpu().detach().numpy()
     print("Validation Accuracy for epoch # ",ep," is: ",val_acc/(batch_idx+1))
     print("Validation Loss for epoch # ",ep," is: ",val_loss/(batch_idx+1))
