@@ -28,6 +28,8 @@ def Center_loss(deep_features_batch, class_center_batch):
 num_classes = 10
 lam = 0.1
 feat_dim = 4096
+batch_size = 20
+alpha = 0.3
 df_train_full = pd.read_csv("train.csv")
 
 
@@ -38,9 +40,9 @@ data_val = df_train_full[45000:50000]
 
 # Setting up the dataloader
 dataset_train = CIFAR10_train(data_train)
-train_loader = DataLoader(dataset_train,batch_size= 20,shuffle=True,num_workers=4)
+train_loader = DataLoader(dataset_train,batch_size= batch_size,shuffle=True,num_workers=4)
 dataset_valid = CIFAR10_val(data_val)
-val_loader = DataLoader(dataset_valid, batch_size=20,shuffle=True,num_workers = 4)
+val_loader = DataLoader(dataset_valid, batch_size=batch_size,shuffle=True,num_workers = 4)
 
 
 # Defining a pre-existing model in torch
@@ -72,7 +74,8 @@ scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, ve
 
 
 # Initializing the centers matrix by random numbers
-centers_matrix = torch.randn(num_classes, feat_dim)
+center_matrix = torch.randn(num_classes, feat_dim)
+
 
 ###### PARAMETERS NEEDED TO BE MONITORED ##########
 train_acc = 0
@@ -107,6 +110,18 @@ for ep in range(num_epochs):
         # Forward passing the image through both the networks - standard net and feature net 
         output = model(image.float())
         feature = feature_model(image.float())
+        
+        # The matrix which is used to update the cluster centers
+        delta_center_matrix = torch.zeros([num_classes, feat_dim], dtype=torch.int32)
+
+        # Computing and updating the cluster centers according to the present mini-batch 
+        for cl in range(1,num_classes+1):
+            for sample in range(batch_size):
+                if numpy.argmax(mask[:,sample].numpy()) == cl:
+                    delta_center_matrix[:,cl]+= feature[:,sample]
+            
+        center_matrix = center_matrix + delta_center_matrix    
+        
         
         
         # Computing the loss as a combination of the center loss and the MSE Loss
