@@ -89,28 +89,32 @@ for ep in range(num_epochs):
     for batch_idx, (subject) in enumerate(train_loader):
         
         # Load the subject and its ground truth
-        image = subject['image']
-        mask = subject['gt']
+        image = subject['image'].float()
+        mask = subject['gt'].float()
         
-        
-        # Loading images into the GPU and ignoring the affine
-        image, mask = image.float(), mask.float()
+
+        # Setting the optimizer to zero
         optimizer.zero_grad()
+        
+        
+        # Forward passing the image through both the networks - standard net and feature net 
         output = model(image.float())
         feature = feature_model(image.float())
         
         
-        # Computing the loss
+        # Computing the loss as a combination of the center loss and the MSE Loss
         mask = mask.T
-        # Combination of the center loss and standard MSE loss
         loss = center_loss(feature.double(), mask[0,:].double())*alpha + MSE_loss(output.double(), mask.double())
+        
+        
         # Backpropagation of the loss
         loss.backward()
+        
         
         #Updating the weight values
         optimizer.step()
         
-        #Pushing the ground truth and predicted class to the cpu
+        #Pushing the ground truth and predicted class to the cpu to calculate the accuracy for particular epoch
         mask = mask.cpu().detach().numpy()
         output = output.cpu().detach().numpy()
         temp = np.zeros((1,num_classes))
@@ -118,19 +122,30 @@ for ep in range(num_epochs):
         train_acc+=sum(mask*temp)
         train_loss+=loss.cpu().detach().numpy()
         
+      
+    # Displaying loss and accuracy after the epoch 
     print("Training Accuracy for epoch # ", ep, " is: ",train_acc/(batch_idx+1))
     print("Training Loss for epoch # ", ep, " is: ",train_loss/(batch_idx+1))
 
+    
+    # Resetting the loss and accuracy after each epoch
     train_acc = 0
     train_loss = 0
+    
+    
     # Now we enter the evaluation/validation part of the epoch - this is same with or without the center loss 
     model.eval        
     for batch_idx, (subject) in enumerate(val_loader):
         with torch.no_grad():
+            
             image = subject['image']
             mask = subject['gt']
-            image, mask = image.to(device), mask.to(device)
+            
+            
+            
             output = model(image.float())
+            
+            #Pushing the ground truth and predicted class to the cpu to calculate the accuracy for particular epoch
             mask = mask.cpu().detach().numpy()
             output = output.cpu().detach().numpy()
             loss = loss_fn(output.double(), mask.double())
@@ -138,11 +153,19 @@ for ep in range(num_epochs):
             temp[0,np.argmax(output)] = 1     
             val_acc+=sum(mask*temp)
             val_loss+=loss.cpu().detach().numpy()
+            
+            
     print("Validation Accuracy for epoch # ",ep," is: ",val_acc/(batch_idx+1))
     print("Validation Loss for epoch # ",ep," is: ",val_loss/(batch_idx+1))
+          
+          
     scheduler.step(val_acc)
+    
+    
     val_acc = 0
     val_loss = 0
+    
+    
     end = time.time()
     print("Time taken for this epoch is: ", (end-start)/60, "minutes")
 
