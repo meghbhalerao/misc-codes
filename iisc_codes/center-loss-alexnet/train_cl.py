@@ -20,12 +20,15 @@ def MSE_loss(mat1,mat2):
     loss = sum(diff*diff)
     return loss
 
+
 num_classes = 10
 df_train_full = pd.read_csv("train.csv")
+
 
 # Defining the train and validation sets clearly
 data_train = df_train_full[0:45000]
 data_val = df_train_full[45000:50000]
+
 
 # Setting up the dataloader
 dataset_train = CIFAR10_train(data_train)
@@ -33,26 +36,30 @@ train_loader = DataLoader(dataset_train,batch_size= 1,shuffle=True,num_workers=4
 dataset_valid = CIFAR10_val(data_val)
 val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 4)
 
+
 # Defining a pre-existing model in torch
 model = models.alexnet(pretrained=True)
 model.classifier[6] = nn.Linear(4096,num_classes)
+
 
 # Freezing the convolutional layer weights
 for param in model.features.parameters():
     param.requires_grad = False
     
+    
 # Freezing the classifier layer weights except the last layer
 for n in range(6):
     for param in model.classifier[n].parameters():
         param.requires_grad = False
-
+     
+        
+# This is the model which gives us the deep features - a 4096 dimensional tensor - this is just done by removing the last layer of the existing alexnet model 
 feature_model = copy.deepcopy(model)
 del(feature_model.classifier[6])
+
+
 print("Training Data Samples: ", len(train_loader))
 
-# Using center loss and defining the parameters needed for the center loss
-center_loss = CenterLoss(num_classes, feat_dim=4096, use_gpu=False)
-optimizer_centloss = torch.optim.SGD(center_loss.parameters(), lr=0.5)
 
 optimizer = optim.Adam(model.classifier[6].parameters(), lr = 0.1, betas = (0.9,0.999), weight_decay = 0.00005)
 scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, verbose=False, threshold=0.003, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
