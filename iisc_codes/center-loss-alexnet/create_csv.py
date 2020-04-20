@@ -2,7 +2,7 @@ import csv
 import os
 import pandas as pd
 #Creates a CSV file in the same folder where the experiment is being carried out
-train_path = "/Users/megh/Work/github-repos/data/cifar-10-batches-py/cifar/train"
+train_path = "/Users/megh/Work/github-repos/data/cifar-10-batches-py/cifar/train/"
 label_list = ['airplane','automobile','bird','cat','deer','dog','frog','horse','ship','truck']
 f1 = open('train.csv','w+')
 patient_train_list = os.listdir(train_path)
