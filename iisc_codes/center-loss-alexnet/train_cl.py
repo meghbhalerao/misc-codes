@@ -72,9 +72,8 @@ print("Training Data Samples: ", len(train_loader))
 optimizer = optim.Adam(model.classifier[6].parameters(), lr = 0.1, betas = (0.9,0.999), weight_decay = 0.00005)
 scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, verbose=False, threshold=0.003, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
 
-
 # Initializing the centers matrix by random numbers
-center_matrix = torch.randn(num_classes, feat_dim)
+center_matrix = torch.randn(feat_dim, num_classes)
 
 
 ###### PARAMETERS NEEDED TO BE MONITORED ##########
@@ -112,7 +111,7 @@ for ep in range(num_epochs):
         feature = feature_model(image.float())
         
         # The matrix which is used to update the cluster centers
-        delta_center_matrix = torch.zeros([num_classes, feat_dim], dtype=torch.int32)
+        delta_center_matrix = torch.zeros([feat_dim, num_classes], dtype=torch.int32)
 
         # Computing and updating the cluster centers according to the present mini-batch 
         for cl in range(1,num_classes+1):
@@ -120,7 +119,8 @@ for ep in range(num_epochs):
                 if numpy.argmax(mask[:,sample].numpy()) == cl:
                     delta_center_matrix[:,cl]+= feature[:,sample]
             
-        center_matrix = center_matrix + delta_center_matrix    
+        center_matrix = center_matrix + delta_center_matrix   
+        
         
         
         
