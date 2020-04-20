@@ -15,11 +15,15 @@ import datetime
 from center_loss import CenterLoss
 import copy
 
-def MSE_loss(mat1,mat2):
-    diff = mat1.flatten() - mat2.flatten()
+def MSE_loss(mask,gt):
+    diff = mask.flatten() - gt.flatten()
     loss = sum(diff*diff)
     return loss
 
+def Center_loss(deep_feature, class_center):   
+    diff = deep_feature.flatten() - class_center.flatten()
+    loss = sum(diff*diff)
+    return loss
 
 num_classes = 10
 df_train_full = pd.read_csv("train.csv")
@@ -80,11 +84,14 @@ for ep in range(num_epochs):
     print("Epoch # : ",ep)
     print("Learning rate:", optimizer.param_groups[0]['lr'])
     model.train
+    
+    
     for batch_idx, (subject) in enumerate(train_loader):
         
         # Load the subject and its ground truth
         image = subject['image']
         mask = subject['gt']
+        
         
         # Loading images into the GPU and ignoring the affine
         image, mask = image.float(), mask.float()
@@ -92,19 +99,13 @@ for ep in range(num_epochs):
         output = model(image.float())
         feature = feature_model(image.float())
         
+        
         # Computing the loss
         mask = mask.T
         # Combination of the center loss and standard MSE loss
         loss = center_loss(feature.double(), mask[0,:].double())*alpha + MSE_loss(output.double(), mask.double())
         # Backpropagation of the loss
         loss.backward()
-        # Updating the parameters of the center loss
-        for param in center_loss.parameters():
-            param.grad.data *= (1./alpha)
-       
-        # Updating the parameters of the center loss as well as the network
-        optimizer_centloss.step()
-        optimizer_centloss.zero_grad()
         
         #Updating the weight values
         optimizer.step()
