@@ -20,12 +20,14 @@ def MSE_loss(mask,gt):
     loss = sum(diff*diff)
     return loss
 
-def Center_loss(deep_feature, class_center):   
-    diff = deep_feature.flatten() - class_center.flatten()
+def Center_loss(deep_features_batch, class_center_batch):   
+    diff = deep_feature_batch.flatten() - class_center_batch.flatten()
     loss = sum(diff*diff)
     return loss
 
 num_classes = 10
+lam = 0.1
+feat_dim = 4096
 df_train_full = pd.read_csv("train.csv")
 
 
@@ -36,14 +38,14 @@ data_val = df_train_full[45000:50000]
 
 # Setting up the dataloader
 dataset_train = CIFAR10_train(data_train)
-train_loader = DataLoader(dataset_train,batch_size= 1,shuffle=True,num_workers=4)
+train_loader = DataLoader(dataset_train,batch_size= 20,shuffle=True,num_workers=4)
 dataset_valid = CIFAR10_val(data_val)
-val_loader = DataLoader(dataset_valid, batch_size=1,shuffle=True,num_workers = 4)
+val_loader = DataLoader(dataset_valid, batch_size=20,shuffle=True,num_workers = 4)
 
 
 # Defining a pre-existing model in torch
 model = models.alexnet(pretrained=True)
-model.classifier[6] = nn.Linear(4096,num_classes)
+model.classifier[6] = nn.Linear(feat_dim,num_classes)
 
 
 # Freezing the convolutional layer weights
@@ -68,6 +70,10 @@ print("Training Data Samples: ", len(train_loader))
 optimizer = optim.Adam(model.classifier[6].parameters(), lr = 0.1, betas = (0.9,0.999), weight_decay = 0.00005)
 scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10, verbose=False, threshold=0.003, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
 
+
+# Initializing the centers matrix by random numbers
+centers_matrix = torch.randn(num_classes, feat_dim)
+
 ###### PARAMETERS NEEDED TO BE MONITORED ##########
 train_acc = 0
 val_acc = 0
@@ -75,6 +81,7 @@ train_loss = 0
 val_loss = 0
 num_epochs = 100
 alpha = 0.1
+
 
 ################ TRAINING THE MODEL ##############
 for ep in range(num_epochs):
@@ -104,7 +111,7 @@ for ep in range(num_epochs):
         
         # Computing the loss as a combination of the center loss and the MSE Loss
         mask = mask.T
-        loss = center_loss(feature.double(), mask[0,:].double())*alpha + MSE_loss(output.double(), mask.double())
+        loss = Center_loss(feature.double(), class_center.double())*lam + MSE_loss(output.double(), mask.double())
         
         
         # Backpropagation of the loss
